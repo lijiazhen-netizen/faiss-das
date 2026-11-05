@@ -16,7 +16,6 @@ env:
   DTK_PKG_URL: ${{ vars.RESOURCE_SERVER_URL }}/dtk-pkg/dtk26.04/DTK-26.04-rc4-centos8-x86_64.tar.gz
   PYPI_URL: ${{ vars.PYPI_URL }}
   MAX_JOBS: "32"
-  CI_OUTPUT_DIR: /ci_public/faiss-das/${{ github.run_id }}
 
 jobs:
   compile:
@@ -30,7 +29,6 @@ jobs:
       options: >-
         --device=/dev/kfd --device=/dev/dri --group-add video
         -v /opt/hyhal:/opt/hyhal:ro
-        -v /ci_public:/ci_public
         --shm-size=80G
         --cap-add=SYS_PTRACE
         --security-opt seccomp=unconfined
@@ -144,14 +142,6 @@ jobs:
             --git_commit "$(git rev-parse HEAD)" \
             --outputdir output \
             -f dist-manylinux/*.whl
-
-      - name: Save wheel on host
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p "${CI_OUTPUT_DIR}"
-          cp -v output/*.whl "${CI_OUTPUT_DIR}/"
-          echo "wheel saved to ${CI_OUTPUT_DIR}"
 
       - name: Upload NIGHTLY package
         if: ${{ github.event_name == 'push' }}
